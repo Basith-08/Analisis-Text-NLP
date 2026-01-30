@@ -1,113 +1,52 @@
-# Quick Start Guide
+# Quick Start: Analisis Sentimen dalam 3 Menit
 
-## Instalasi Dependencies Selesai!
+Panduan ini akan memandu Anda untuk melatih model dan melakukan prediksi sentimen secepat mungkin.
 
-Semua dependencies Python telah terinstall dengan sukses. Sekarang Anda bisa menjalankan aplikasi.
+## 1. Jalankan Aplikasi
 
-## Menjalankan Aplikasi
+Gunakan skrip yang sudah disediakan untuk menjalankan backend dan frontend secara bersamaan.
 
-### Opsi 1: Menggunakan Script Otomatis (RECOMMENDED)
-
+**Di Linux/Mac:**
 ```bash
 ./run.sh
 ```
 
-Script ini akan otomatis menjalankan backend dan frontend secara bersamaan.
-
-### Opsi 2: Manual (2 Terminal Terpisah)
-
-**Terminal 1 - Backend:**
-```bash
-cd backend
-source venv/bin/activate
-python app.py
+**Di Windows:**
+```bat
+run.bat
 ```
 
-**Terminal 2 - Frontend:**
-```bash
-cd frontend
-bun run dev
-```
+Setelah skrip berjalan, buka browser dan akses **[http://localhost:3000](http://localhost:3000)**.
 
-## Akses Aplikasi
+## 2. Latih Model (Training)
 
-Setelah kedua server berjalan:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
+1.  **Buka Tab "Training & Evaluasi"**.
+2.  **Pilih Dataset**: Pilih dataset yang ingin digunakan, misalnya `GojekAppReviewV4.0.0-V4.9.3_Cleaned.csv`.
+3.  **Pilih Kolom**:
+    *   Kolom Teks (Fitur): `review`
+    *   Kolom Label (Target): `sentiment`
+4.  **Mulai Training**: Klik tombol **"Mulai Training & Evaluasi"**.
 
-## Cara Menggunakan
+Tunggu beberapa saat hingga proses selesai. Anda akan melihat tabel perbandingan performa model dan visualisasi *confusion matrix*. Sistem akan secara otomatis menentukan dan menyimpan model terbaik.
 
-### 1. Dataset Processing Mode
-1. Pilih dataset dari dropdown (dataset sudah tersedia di folder `datasets/`)
-2. Pilih kolom teks yang ingin diproses (otomatis terdeteksi: comment_text, video_caption)
-3. Tentukan jumlah data yang ingin diproses (default: 50)
-4. Klik "Proses Dataset"
-5. Lihat hasil preprocessing dalam tabel
+## 3. Lakukan Prediksi
 
-### 2. Custom Text Mode
-1. Klik tab "Custom Text"
-2. Masukkan teks manual atau pilih contoh
-3. Klik "Proses Teks"
-4. Lihat hasil preprocessing
+Setelah model selesai dilatih:
 
-## Fitur Preprocessing
+1.  **Buka Tab "Prediksi Teks"**.
+2.  **Masukkan Teks**: Ketik sebuah kalimat di kotak teks. Contoh:
+    *   `"Aplikasinya keren dan sangat membantu saya sehari-hari."`
+    *   `"Sangat lambat dan sering error, mengecewakan."`
+3.  **Prediksi**: Klik tombol **"Prediksi Sentimen"**.
 
-Pipeline yang diterapkan:
-1. **Cleaning**: Hapus emoji, URL, mention, hashtag, angka, tanda baca
-2. **Tokenization**: Pisahkan teks menjadi kata-kata
-3. **Stopword Removal**: Hapus kata-kata umum (yang, dan, di, dll)
-4. **Normalization**: Konversi ke lowercase
+Hasil prediksi (positif, negatif, atau netral) dan probabilitasnya akan muncul di bawah tombol.
 
-## Hasil Output
+---
 
-Untuk setiap teks, Anda akan melihat:
-- **Teks Asli**: Teks sebelum diproses
-- **Teks Bersih**: Teks setelah cleaning
-- **Tokens**: Semua kata hasil tokenisasi
-- **Filtered Tokens**: Kata-kata setelah stopword removal
-- **Jumlah**: Total filtered tokens
+**Selesai!** Anda telah berhasil melatih model klasifikasi sentimen dan menggunakannya untuk prediksi.
 
-## Dataset yang Tersedia
+### Ingin Tahu Lebih Lanjut?
 
-- `dataset_ui_nlp - Sheet1.csv` - Dataset komentar TikTok Universitas Indonesia
-
-Kolom dalam dataset:
-- university
-- tiktok_account
-- followers
-- video_caption
-- likes
-- video_comments_count
-- shares
-- upload_date
-- comment_text
-
-## Troubleshooting
-
-### Backend tidak terhubung
-```bash
-# Cek apakah backend berjalan
-curl http://localhost:5000/api/health
-
-# Jika error, restart backend
-cd backend
-source venv/bin/activate
-python app.py
-```
-
-### NLTK Error
-NLTK resources akan didownload otomatis saat pertama kali dijalankan. Jika ada error, tunggu hingga download selesai.
-
-### Port sudah digunakan
-Jika port 5000 atau 3000 sudah digunakan, ubah di:
-- Backend: `backend/app.py` (line terakhir: `app.run(..., port=5000)`)
-- Frontend: `frontend/vite.config.js` (server.port)
-
-## Tips
-
-1. Mulai dengan dataset kecil (50-100 data) untuk testing
-2. Gunakan Custom Text untuk testing preprocessing secara cepat
-3. Periksa hasil preprocessing untuk memastikan pipeline bekerja dengan baik
-4. Dataset dapat ditambah dengan menaruh file CSV di folder `datasets/`
-
-Selamat mencoba!
+- **Tab Preprocessing**: Lihat bagaimana teks dibersihkan sebelum diproses.
+- **File `sentiment_analysis_pipeline.ipynb`**: Pelajari setiap langkah alur kerja machine learning secara mendalam, dari data mentah hingga prediksi.
+- **File `README.md`**: Dapatkan informasi lengkap tentang arsitektur, fitur, dan cara kustomisasi aplikasi.

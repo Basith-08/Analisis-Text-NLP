@@ -1,9 +1,9 @@
 <template>
   <div id="app">
     <header class="card">
-      <h1>Analisis Text NLP - Preprocessing Tool</h1>
+      <h1>Analisis Sentimen & Preprocessing NLP</h1>
       <p style="color: var(--text-secondary)">
-        Tool untuk preprocessing teks menggunakan Python (Pandas, NumPy, NLTK)
+        Tool untuk preprocessing, training model klasifikasi, dan prediksi sentimen.
       </p>
     </header>
 
@@ -20,15 +20,21 @@
       <div class="flex" style="border-bottom: 2px solid var(--border-color); margin-bottom: 1rem;">
         <button
           :class="activeTab === 'dataset' ? 'primary' : 'secondary'"
-          @click="activeTab = 'dataset'"
+          @click="switchTab('dataset')"
         >
-          Dataset Processing
+          Preprocessing
         </button>
         <button
-          :class="activeTab === 'custom' ? 'primary' : 'secondary'"
-          @click="activeTab = 'custom'"
+          :class="activeTab === 'training' ? 'primary' : 'secondary'"
+          @click="switchTab('training')"
         >
-          Custom Text
+          Training & Evaluasi
+        </button>
+        <button
+          :class="activeTab === 'predict' ? 'primary' : 'secondary'"
+          @click="switchTab('predict')"
+        >
+          Prediksi Teks
         </button>
       </div>
 
@@ -41,23 +47,30 @@
           @process="processDataset"
         />
       </div>
+      
+      <!-- Training Tab -->
+      <div v-if="activeTab === 'training'">
+        <TrainingView
+          :datasets="datasets"
+          :loading="trainingLoading"
+          @train="trainAndEvaluate"
+        />
+      </div>
 
-      <!-- Custom Text Tab -->
-      <div v-else>
+      <!-- Predict Tab -->
+      <div v-if="activeTab === 'predict'">
         <CustomTextProcessor
           :loading="loading"
+          :prediction="predictionResult"
           @process="processCustomText"
+          @predict="predictText"
         />
       </div>
     </div>
 
-    <!-- Results -->
-    <div v-if="results.length > 0" class="card">
+    <!-- Preprocessing Results -->
+    <div v-if="results.length > 0 && activeTab === 'dataset'" class="card">
       <h2>Hasil Preprocessing</h2>
-      <p style="color: var(--text-secondary); margin-bottom: 1rem;">
-        Total data diproses: <strong>{{ results.length }}</strong>
-      </p>
-
       <div class="table-container">
         <table>
           <thead>
@@ -67,7 +80,6 @@
               <th style="width: 25%;">Teks Bersih</th>
               <th style="width: 20%;">Tokens</th>
               <th style="width: 20%;">Filtered Tokens</th>
-              <th style="width: 100px;">Jumlah</th>
             </tr>
           </thead>
           <tbody>
@@ -78,13 +90,6 @@
               </td>
               <td style="font-size: 0.9em;">
                 {{ truncate(result.cleaned, 100) }}
-              </td>
-              <td>
-                <div style="max-height: 100px; overflow-y: auto; font-size: 0.85em;">
-                  <span v-for="(token, idx) in result.tokens" :key="idx" class="badge badge-primary" style="margin: 2px;">
-                    {{ token }}
-                  </span>
-                </div>
               </td>
               <td>
                 <div style="max-height: 100px; overflow-y: auto; font-size: 0.85em;">
@@ -101,6 +106,24 @@
         </table>
       </div>
     </div>
+    
+    <!-- Preprocessing result for custom text -->
+    <div v-if="results.length > 0 && activeTab === 'predict'" class="card">
+        <h2>Hasil Preprocessing</h2>
+        <p>Teks Asli: <strong>{{ results[0].original }}</strong></p>
+        <p>Teks Bersih: <strong>{{ results[0].cleaned }}</strong></p>
+        <p>Tokens Final (setelah stopword & stemming):</p>
+        <div>
+            <span v-for="(token, idx) in results[0].filtered_tokens" :key="idx" class="badge badge-success" style="margin: 2px;">
+                {{ token }}
+            </span>
+        </div>
+    </div>
+
+
+    <!-- Training Results -->
+    <ResultsView v-if="trainingResults && activeTab === 'training'" :results="trainingResults" />
+
   </div>
 </template>
 
@@ -108,19 +131,35 @@
 import { ref, onMounted } from 'vue'
 import DatasetProcessor from './components/DatasetProcessor.vue'
 import CustomTextProcessor from './components/CustomTextProcessor.vue'
+import TrainingView from './components/TrainingView.vue'
+import ResultsView from './components/ResultsView.vue'
+
 
 export default {
   name: 'App',
   components: {
     DatasetProcessor,
-    CustomTextProcessor
+    CustomTextProcessor,
+    TrainingView,
+    ResultsView,
   },
   setup() {
     const activeTab = ref('dataset')
     const backendStatus = ref({ connected: false, error: false, message: '' })
     const datasets = ref([])
     const loading = ref(false)
+    const trainingLoading = ref(false)
     const results = ref([])
+    const trainingResults = ref(null)
+    const predictionResult = ref(null)
+
+    const switchTab = (tabName) => {
+        activeTab.value = tabName
+        // Clear results when switching tabs
+        results.value = []
+        if (tabName !== 'training') trainingResults.value = null
+        if (tabName !== 'predict') predictionResult.value = null
+    }
 
     // Check backend health
     const checkBackend = async () => {
@@ -155,20 +194,17 @@ export default {
       }
     }
 
-    // Process dataset
+    // Process dataset for preprocessing view
     const processDataset = async (payload) => {
       try {
         loading.value = true
         results.value = []
-
         const response = await fetch('/api/preprocess', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         })
-
         const data = await response.json()
-
         if (data.status === 'success') {
           results.value = data.results
         } else {
@@ -180,21 +216,50 @@ export default {
         loading.value = false
       }
     }
+    
+    // Train and evaluate models
+    const trainAndEvaluate = async (payload) => {
+      try {
+        trainingLoading.value = true
+        trainingResults.value = null
+        const response = await fetch('/api/train_evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
 
-    // Process custom text
-    const processCustomText = async (text) => {
+        const responseText = await response.text();
+        try {
+          const data = JSON.parse(responseText);
+          if (data.status === 'success') {
+            trainingResults.value = data
+          } else {
+            alert('Error: ' + data.message)
+          }
+        } catch (e) {
+          console.error("Failed to parse JSON:", responseText);
+          alert('An error occurred during training. The server response was not valid JSON. Check the console for more details.');
+        }
+
+      } catch (error) {
+        alert('Error during training: ' + error.message)
+      } finally {
+        trainingLoading.value = false
+      }
+    }
+
+    // Process custom text for preprocessing view
+    const processCustomText = async (payload) => {
       try {
         loading.value = true
         results.value = []
-
+        predictionResult.value = null
         const response = await fetch('/api/preprocess-custom', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text })
+          body: JSON.stringify(payload)
         })
-
         const data = await response.json()
-
         if (data.status === 'success') {
           results.value = [{
             id: 1,
@@ -215,6 +280,30 @@ export default {
       }
     }
 
+    // Predict sentiment for custom text
+    const predictText = async (payload) => {
+        try {
+            loading.value = true;
+            predictionResult.value = null;
+            results.value = [];
+            const response = await fetch('/api/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                predictionResult.value = data;
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            alert('Error predicting: ' + error.message);
+        } finally {
+            loading.value = false;
+        }
+    };
+
     // Utility function to truncate text
     const truncate = (text, maxLength) => {
       if (!text) return ''
@@ -231,10 +320,16 @@ export default {
       backendStatus,
       datasets,
       loading,
+      trainingLoading,
       results,
+      trainingResults,
+      predictionResult,
+      switchTab,
       loadDatasets,
       processDataset,
+      trainAndEvaluate,
       processCustomText,
+      predictText,
       truncate
     }
   }

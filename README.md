@@ -1,44 +1,58 @@
-# Analisis Text NLP - Preprocessing Tool
+# Analisis Sentimen & Preprocessing NLP
 
-Aplikasi web untuk preprocessing teks menggunakan NLP (Natural Language Processing) dengan Python sebagai backend dan Vue.js sebagai frontend.
+Aplikasi web lengkap untuk analisis sentimen, mulai dari preprocessing teks, training model machine learning, hingga prediksi sentimen pada data baru.
 
-## Fitur
+## Fitur Utama
 
-- **Preprocessing Teks Otomatis**
-  - Pembersihan data (hapus emoji, karakter khusus, angka)
-  - Tokenisasi (pemisahan kata)
-  - Stopword removal (hapus kata umum)
-  - Support untuk teks Bahasa Indonesia
+- **Preprocessing Teks Lengkap**
+  - Case folding, pembersihan (URL, emoji, mention, angka, dll.).
+  - Tokenisasi & Stopword Removal (dengan daftar custom).
+  - **Stemming** untuk Bahasa Indonesia menggunakan Sastrawi (opsional).
 
-- **Upload Dataset**
-  - Upload file CSV sendiri (maks. 16MB)
-  - Validasi otomatis format CSV
-  - Preview dataset setelah upload
-  - Auto-select dataset yang baru diupload
+- **Training & Evaluasi Model**
+  - Ekstraksi fitur dengan **Bag-of-Words (BoW)** dan **TF-IDF**.
+  - Training tiga model klasifikasi: **Naive Bayes, Decision Tree, dan SVM**.
+  - Evaluasi performa model menggunakan Akurasi, Presisi, Recall, dan F1-Score.
+  - Visualisasi **Confusion Matrix** untuk setiap model.
+  - Perbandingan hasil untuk menemukan model terbaik.
 
-- **Dua Mode Input**
-  - Dataset Processing: Proses file CSV secara batch
-  - Custom Text: Proses teks manual secara real-time
+- **Prediksi Sentimen**
+  - Gunakan model terbaik yang telah dilatih untuk memprediksi sentimen dari teks baru secara real-time.
 
-- **Visualisasi Hasil**
-  - Tabel perbandingan teks asli dan hasil preprocessing
-  - Badge untuk tokens dan filtered tokens
-  - Preview dataset sebelum diproses
+- **Manajemen Dataset**
+  - Upload file CSV (maks. 16MB) dan langsung gunakan untuk training.
+  - Pilih kolom teks dan label secara dinamis.
+
+- **Notebook Analisis**
+  - Termasuk notebook Jupyter (`sentiment_analysis_pipeline.ipynb`) yang mendemonstrasikan seluruh alur kerja secara transparan.
+
+### ✨ Fitur Baru: Persistensi Model Otomatis
+    
+Aplikasi ini sekarang secara otomatis **menyimpan model terbaik** ke disk setelah proses training selesai.
+    
+- **Tidak Perlu Training Ulang**: Saat aplikasi dijalankan kembali, model terbaik yang sudah tersimpan akan **dimuat secara otomatis**.
+- **Langsung Siap Prediksi**: Anda bisa langsung menggunakan fitur prediksi tanpa harus melatih ulang model setiap kali server dinyalakan.
+- **Efisien**: Menghemat waktu dan sumber daya komputasi. Model disimpan di `backend/models/best_model.joblib`.
 
 ## Teknologi
 
 ### Backend
-- Python 3.13.6
+- Python 3.11+
 - Flask (Web Framework)
-- Pandas & NumPy (Data Processing)
-- NLTK (Tokenization)
+- Pandas & NumPy (Manipulasi Data)
+- NLTK (Tokenization, Stopwords)
 - Sastrawi (Indonesian Stemmer)
-- Emoji (Emoji Removal)
+- **Scikit-learn** (Ekstraksi Fitur, Model ML, Evaluasi)
+- Joblib (Persistensi Model)
 
 ### Frontend
-- Vue 3
+- Vue 3 (Composition API)
 - Vite
 - Bun (Package Manager & Runtime)
+
+### Analisis & Visualisasi
+- Jupyter Notebook
+- Matplotlib & Seaborn
 
 ## Struktur Proyek
 
@@ -46,21 +60,22 @@ Aplikasi web untuk preprocessing teks menggunakan NLP (Natural Language Processi
 code/
 ├── backend/
 │   ├── app.py                 # Flask API server
-│   ├── nlp_processor.py       # NLP preprocessing pipeline
-│   └── requirements.txt       # Python dependencies
+│   ├── nlp_processor.py       # Pipeline preprocessing NLP
+│   ├── models/                # Direktori untuk model yang disimpan
+│   │   └── best_model.joblib  # File model terbaik (dibuat otomatis)
+│   └── requirements.txt       # Dependensi Python
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── DatasetProcessor.vue
-│   │   │   └── CustomTextProcessor.vue
-│   │   ├── App.vue
-│   │   ├── main.js
-│   │   └── style.css
-│   ├── index.html
-│   ├── vite.config.js
-│   └── package.json
+│   │   │   ├── CustomTextProcessor.vue
+│   │   │   ├── TrainingView.vue       # UI untuk training
+│   │   │   └── ResultsView.vue        # UI untuk hasil evaluasi
+│   │   └── App.vue              # Komponen utama
+│   └── ...
 ├── datasets/
-│   └── dataset_ui_nlp - Sheet1.csv
+│   └── ... (contoh: GojekAppReview.csv)
+├── sentiment_analysis_pipeline.ipynb # Notebook alur kerja ML
 └── README.md
 ```
 
@@ -71,13 +86,12 @@ code/
 ```bash
 cd backend
 
-# Buat virtual environment (opsional tapi direkomendasikan)
+# Buat dan aktifkan virtual environment
 python3 -m venv venv
 source venv/bin/activate  # Linux/Mac
-# atau
-venv\Scripts\activate  # Windows
+# venv\Scripts\activate    # Windows
 
-# Install dependencies
+# Install dependensi
 pip install -r requirements.txt
 ```
 
@@ -86,29 +100,13 @@ pip install -r requirements.txt
 ```bash
 cd frontend
 
-# Install dependencies dengan Bun
+# Install dependensi
 bun install
 ```
 
 ## Menjalankan Aplikasi
 
-### Cara 1: Manual (2 Terminal)
-
-**Terminal 1 - Backend:**
-```bash
-cd backend
-python app.py
-```
-Backend akan berjalan di `http://localhost:5000`
-
-**Terminal 2 - Frontend:**
-```bash
-cd frontend
-bun run dev
-```
-Frontend akan berjalan di `http://localhost:3000`
-
-### Cara 2: Menggunakan Script (Otomatis)
+Jalankan backend dan frontend secara bersamaan menggunakan skrip yang tersedia.
 
 **Linux/Mac:**
 ```bash
@@ -121,69 +119,32 @@ chmod +x run.sh
 run.bat
 ```
 
-## Penggunaan
+Aplikasi akan tersedia di `http://localhost:3000` (frontend) dan `http://localhost:5000` (backend).
 
-1. Buka browser dan akses `http://localhost:3000`
+## Alur Kerja Aplikasi
 
-2. **Upload Dataset (Opsional):**
-   - Klik "Dataset Processing" tab
-   - Pada bagian "Upload Dataset Baru", klik "Choose File"
-   - Pilih file CSV dari komputer Anda (maks. 16MB)
-   - Klik tombol "Upload"
-   - Dataset akan otomatis tersimpan dan terpilih
-
-3. **Mode Dataset Processing:**
-   - Pilih dataset dari dropdown (atau gunakan dataset yang baru diupload)
-   - Klik tombol "Refresh" untuk memperbarui daftar dataset
-   - Pilih kolom teks yang ingin diproses
-   - Tentukan jumlah data yang akan diproses
-   - Klik "Proses Dataset"
-   - Lihat hasil preprocessing dalam tabel
-
-4. **Mode Custom Text:**
-   - Klik tab "Custom Text"
-   - Masukkan teks manual atau pilih contoh
-   - Klik "Proses Teks"
-   - Lihat hasil preprocessing
-
-## Pipeline Preprocessing
-
-1. **Input Teks**: Ambil teks dari dataset atau input manual
-2. **Cleaning**:
-   - Konversi ke lowercase
-   - Hapus emoji
-   - Hapus URL, mention, hashtag
-   - Hapus angka
-   - Hapus tanda baca dan karakter khusus
-3. **Tokenisasi**: Pisahkan teks menjadi kata-kata
-4. **Stopword Removal**: Hapus kata-kata umum yang tidak bermakna
-5. **Output**: Tampilkan hasil dalam tabel
+1.  **Tab Preprocessing**: Lakukan preprocessing pada dataset atau teks custom untuk melihat hasilnya (cleaning, tokenisasi, dll.).
+2.  **Tab Training & Evaluasi**:
+    - **(Hanya saat pertama kali atau jika ingin model baru)** Pilih dataset, kolom teks, dan kolom label.
+    - Klik "Mulai Training & Evaluasi".
+    - Backend akan melatih 6 kombinasi model dan **menyimpan yang terbaik secara otomatis ke disk**. Hasil perbandingan akan ditampilkan.
+3.  **Tab Prediksi Teks**:
+    - Masukkan teks baru.
+    - Klik "Prediksi Sentimen".
+    - Aplikasi akan menggunakan model terbaik yang **tersimpan di disk** (atau dari sesi training terakhir) untuk memberikan prediksi.
+    
+> **Catatan**: Jika file `backend/models/best_model.joblib` sudah ada saat aplikasi dimulai, Anda bisa langsung ke "Tab Prediksi Teks" tanpa perlu training ulang.
 
 ## API Endpoints
 
-- `GET /api/health` - Health check
-- `GET /api/datasets` - List available datasets
-- `POST /api/upload-dataset` - Upload new CSV dataset (max 16MB)
-- `POST /api/load-dataset` - Load and preview dataset
-- `POST /api/preprocess` - Preprocess dataset
-- `POST /api/preprocess-custom` - Preprocess custom text
-
-## Troubleshooting
-
-### Backend tidak terhubung
-- Pastikan Python backend berjalan di port 5000
-- Cek apakah semua dependencies terinstall
-- Jalankan `python app.py` di folder backend
-
-### NLTK Resource Error
-NLTK akan otomatis mendownload resource yang diperlukan saat pertama kali dijalankan.
-
-### Dataset tidak muncul
-Pastikan file CSV ada di folder `datasets/`
-
-## Kontribusi
-
-Aplikasi ini dikembangkan untuk tugas Pemrosesan Bahasa Alami.
+- `GET /api/health`: Health check.
+- `GET /api/datasets`: Daftar dataset yang tersedia.
+- `POST /api/upload-dataset`: Upload dataset CSV baru.
+- `POST /api/load-dataset`: Muat kolom dari dataset.
+- `POST /api/preprocess`: Proses teks dari dataset (hanya preprocessing).
+- `POST /api/preprocess-custom`: Proses teks custom (hanya preprocessing).
+- `POST /api/train_evaluate`: Latih dan evaluasi model.
+- `POST /api/predict`: Prediksi sentimen pada teks baru.
 
 ## Lisensi
 

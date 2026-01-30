@@ -30,9 +30,12 @@ source venv/bin/activate
 pip install -r requirements.txt > /dev/null 2>&1
 
 # Start backend in background
-python app.py &
+python3 app.py &
 BACKEND_PID=$!
 echo "Backend started with PID: $BACKEND_PID"
+
+echo "Waiting for backend to initialize..."
+sleep 5
 
 cd ..
 

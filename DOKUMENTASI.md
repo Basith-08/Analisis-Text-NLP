@@ -100,6 +100,8 @@ Berikut adalah penjelasan lengkap dan bertahap untuk keseluruhan pipeline *Natur
 ### 1. Preprocessing
 Preprocessing adalah fondasi dari setiap pipeline NLP. Tujuannya adalah untuk membersihkan dan menstandarisasi teks agar model *machine learning* dapat memprosesnya secara efektif.
 
+![Tampilan UI Preprocessing](photo/preproceccing.png)
+
 **Alur Preprocessing:**
 ```
 INPUT TEKS
@@ -161,7 +163,7 @@ Setelah dilatih, performa setiap model diukur menggunakan data uji.
     -   **Presisi**: Dari semua yang diprediksi "Positif", berapa persen yang benar-benar "Positif". `TP / (TP + FP)`.
     -   **Recall**: Dari semua yang seharusnya "Positif", berapa persen yang berhasil diprediksi dengan benar. `TP / (TP + FN)`.
     -   **F1-Score**: Rata-rata harmonik dari Presisi dan Recall, memberikan skor yang seimbang.
--   **Confusion Matrix**: Sebuah tabel yang merangkum performa model dengan menunjukkan jumlah prediksi yang benar dan salah untuk setiap kelas.
+-   **Confusion Matrix**: Sebuah tabel yang merangkum performa model dengan menunjukkan jumlah prediksi yang benar dan salah untuk setiap kelas. Di aplikasi, Anda akan melihat Confusion Matrix terpisah untuk setiap model, yang dihasilkan baik dari fitur **Bag-of-Words (BoW)** maupun **TF-IDF**. Ini membantu menganalisis jenis kesalahan prediksi yang dibuat oleh model untuk masing-masing metode ekstraksi fitur.
     -   **True Positive (TP)**: Prediksi "Positif", Sebenarnya "Positif".
     -   **True Negative (TN)**: Prediksi "Negatif", Sebenarnya "Negatif".
     -   **False Positive (FP)**: Prediksi "Positif", Sebenarnya "Negatif".
@@ -234,6 +236,9 @@ Tujuan dari langkah ini adalah untuk melatih model-model *machine learning* pada
     -   **Pilih Kolom Teks (Fitur)**: Pilih kolom yang berisi teks ulasan, misalnya `review`.
     -   **Pilih Kolom Label (Target)**: Pilih kolom yang berisi label sentimen, misalnya `sentiment`.
     -   **Aktifkan Stemming (Opsional)**: Centang kotak **"Gunakan Stemming"** jika Anda ingin menerapkan proses stemming pada teks. Ini dapat meningkatkan akurasi tetapi akan membuat proses pelatihan lebih lama.
+    
+    ![Konfigurasi Pelatihan](photo/training_dan_evaluasi_2_no_steming.png)
+
 4.  **Mulai Pelatihan**:
     -   Klik tombol **"Mulai Training & Evaluasi"**.
     -   Aplikasi akan memulai proses *backend* yang mencakup:
@@ -246,6 +251,12 @@ Tujuan dari langkah ini adalah untuk melatih model-model *machine learning* pada
         -   **Tabel Perbandingan Hasil**: Menunjukkan metrik (Akurasi, Presisi, Recall, F1-Score) untuk setiap kombinasi model dan fitur.
         -   **Model Terbaik**: Ringkasan model dengan akurasi tertinggi akan ditampilkan. Model ini secara otomatis disimpan di server (`backend/models/best_model.joblib`) untuk digunakan pada tahap prediksi.
         -   **Confusion Matrix**: Visualisasi matriks untuk setiap model, membantu menganalisis kesalahan prediksi.
+
+    ![Tabel Hasil Evaluasi](photo/training_dan_evaluasi_4_no_steming.png)
+    *Tabel Perbandingan Hasil*
+
+    ![Confusion Matrices](photo/training_dan_evaluasi_5_no_steming.png)
+    *Visualisasi Confusion Matrix untuk setiap model*
 
 ### 2. Melakukan Prediksi Sentimen
 Setelah model terbaik disimpan, Anda dapat langsung menggunakannya untuk memprediksi sentimen teks baru.
@@ -264,6 +275,8 @@ Setelah model terbaik disimpan, Anda dapat langsung menggunakannya untuk mempred
     -   Hasil akan muncul di bawah tombol, menampilkan:
         -   **Prediksi**: Sentimen yang diprediksi (misalnya, `positif` atau `negatif`).
         -   **Probabilitas**: Skor kepercayaan untuk setiap kelas sentimen, membantu memahami seberapa yakin model dengan prediksinya.
+        
+    ![Hasil Prediksi Sentimen](photo/prediksi_teks_sentimen_2_with_steming.png)
 
 
 ## Troubleshooting
